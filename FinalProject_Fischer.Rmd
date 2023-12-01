@@ -22,9 +22,9 @@ if (interactive()) {
   chloride_raw <- read.csv("Chloride_ogR.csv")
 }
 
-
 chloride_data <- chloride_raw %>% 
-        rename( "n_overall" = "n..overall.Cl.avg.",
+  subset(select = -c(DOW.site.no.., source.., location, MPCA.Chloride.Impairment.Year, no..samples, project.id, dataset.location..., tbd, tbd.1, notes, X, X....where.the.datafile.is.located..brackets.indicate.the.shared.drive.name.)) %>%
+  rename( "n_overall" = "n..overall.Cl.avg.",
               "Overall_avg_Cl" = "Overall.Cl.Avg...mg.L.",
                "n_summer_overall" = "n..overall.summer.Cl.avg.",
                 "summer_overall_avg_cl" = "Overall.Summer.Cl.Avg...mg.L.",
