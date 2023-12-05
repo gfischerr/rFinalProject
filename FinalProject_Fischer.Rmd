@@ -1,10 +1,10 @@
 ---
-title: "Final Project"
+title: "Final Project - Results and Analysis"
 author: "Georgianna Fischer"
 date: "2023-11-21"
 output:
-  word_document: default
   html_document: default
+  word_document: default
   pdf_document: default
 ---
 
@@ -15,7 +15,7 @@ library(tidyverse)
 
 ## Data Cleaning
 
-```{r data cleaning, include=FALSE}
+```{r data cleaning}
 if (interactive()) {
   chloride_raw <- read.csv(file.choose())
 } else {
@@ -45,7 +45,7 @@ SURF_data <- subset(SURF_raw, select = -c(X, X.1, X.2, X.3, X.4))
 
 ## Historical Graph
 
-```{r Historic Patterns, include=FALSE}
+```{r Historic Patterns}
 chloride_sum <- chloride_data %>%
   drop_na(summer_overall_avg_cl) %>%
   group_by(type) %>%
@@ -60,8 +60,9 @@ Avg_summer_plot <- chloride_sum %>%
   theme_minimal()
 print(Avg_summer_plot)
 ```
-## Historical Analysis
-The results of the historical summer chloride graph shows a lot of variance between the types of water bodies. The lowest average chloride values lie in ponds and mixed wetlands and ponds, 
+
+## Historical Draft Analysis
+  The results of the historical summer chloride graph shows a lot of variance between the types of water bodies. The lowest average chloride values lie in ponds and mixed wetlands and ponds, with 28 mg/L of chloride present. Lakes, ponds, wetlands, and streams all had relatively low historical summer chloride, while drains and springs had the highest chloride concentrations at roughly 232 and 229 mg/L, respectively.  
 
 ## Recent graphs
 
@@ -73,31 +74,36 @@ O18_plot <- ggplot(data = SURF_data, aes(x = Cl, y = X18O)) +
   geom_point() + 
   geom_smooth(method = "lm", color = "blue") +
   labs(x = "Chloride (mg/l)", y = "18O")+
-  theme_minimal()
+  theme_minimal() +
+  theme(axis.title = element_text(size = 10))
 
 Rd_length_plot <- ggplot(data = SURF_data, aes(x = Cl, y = RdLength_per_WtshdArea, color = typeWater)) + 
   geom_point() + 
   geom_smooth(method = "lm", color = "red") +
   labs(x = "Chloride (mg/l)", y = "Road Length 
        per Watershed Area") +
-  guides(color = guide_legend(title = "Dominant Water Source")) +
   theme_minimal() +
-  theme(legend.position = "bottom") 
+  theme(legend.position = "none") +
+  theme(axis.title = element_text(size = 10))
 
 
 wtshd_dev_plot <- ggplot(data = SURF_data, aes(x = Cl, y = Percent_wtshd_dev, color = typeWater)) + 
   geom_point() + 
   geom_smooth(method = "lm", color = "red") +
   labs(x = "Chloride (mg/l)", y = "Percent Developed") +
-  coord_cartesian(ylim = c(0, 100)) +
+  coord_cartesian(ylim = c(0, 100)) + 
+  guides(color = guide_legend(title = "Dominant Water Source")) +
   theme_minimal() +
-  theme(legend.position = "none")
+  theme(legend.position = "right") +
+  theme(axis.title = element_text(size = 10), legend.title = element_text(size = 10),legend.text = element_text(size = 8))
 
 DIC_plot <- ggplot(data = SURF_data, aes(x = Cl, y = DIC)) + 
   geom_point() + 
   geom_smooth(method = "lm", color = 'blue') +
   labs(x = "Chloride (mg/l)", y = "DIC")+
-  theme_minimal()
+  theme_minimal() +
+  theme(axis.title = element_text(size = 10))
+library(patchwork)
 combined_SURFplots <- O18_plot / DIC_plot / Rd_length_plot / wtshd_dev_plot + plot_layout(ncol = 2)
 print(combined_SURFplots)
 ```
@@ -115,3 +121,6 @@ roads_linearmod <- lm(RdLength_per_WtshdArea~Cl, data = SURF_data)
 summary(roads_linearmod)
 ```
 
+## Analysis of recent trends
+  The results of the relationship between the biogeochemical tracers and chloride showed much fine scale heterogeneity. Both oxygen isotope ratios (O18) and dissolved inorganic carbon (DIC) showed a lot of variance within the data, with a few outliers. While there is a general downward trend to the data, the relationship isn't very significant for either, although O18 is shown to have more of a relationship with the chloride values than DIC - the results of the linear regression show that the O18 relationship has a p-value of 0.0996 and an R-squared value of 0.08504, while the DIC relationship has a p-value of 0.66 and an R-squared value of 0.006328. 
+  As for the land use indicators, both had a positive relationship with chloride concentrations. For every increase in mg/L of chloride, percentage of developed land within the watershed was shown to increase by 0.088824. Road length per watershed area increased by 0.003751 with chloride. Linear regression of these relationships indicates a relatively significant relationship for percent watershed developed and chloride, with a p-value of 0.00531 and an R-squared of 0.3751. The relationship between road length and chloride is slightly less significant, with a p-value of 0.127 and an R-squared of 0.1318. 
