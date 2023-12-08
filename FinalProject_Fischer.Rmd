@@ -3,9 +3,9 @@ title: "Final Project - Results and Analysis"
 author: "Georgianna Fischer"
 date: "2023-11-21"
 output:
-  html_document: default
-  word_document: default
   pdf_document: default
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -65,11 +65,21 @@ print(Avg_summer_plot)
   The results of the historical summer chloride graph shows a lot of variance between the types of water bodies. The lowest average chloride values lie in ponds and mixed wetlands and ponds, with 28 mg/L of chloride present. Lakes, ponds, wetlands, and streams all had relatively low historical summer chloride, while drains and springs had the highest chloride concentrations at roughly 232 and 229 mg/L, respectively.  
 
 ## Recent graphs
+### Histogram
+```{r chloride dist}
+Cl_dist_23 <- SURF_data %>%
+  ggplot( aes(x=Cl)) +
+    geom_histogram( binwidth=20, fill="#69b3a2", color="#e9ecef", alpha=0.9) +
+    ggtitle("Chloride Concentration") +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size=15))
+print(Cl_dist_23)
+```
 
-```{r recent patterns graphs}
-SURF_data <- SURF_data %>%
-  mutate(typeWater = ifelse(X18O > -7, "surface", "ground"))
 
+### Scatterplots
+```{r recent patterns scatterplots}
 O18_plot <- ggplot(data = SURF_data, aes(x = Cl, y = X18O)) + 
   geom_point() + 
   geom_smooth(method = "lm", color = "blue") +
@@ -77,25 +87,29 @@ O18_plot <- ggplot(data = SURF_data, aes(x = Cl, y = X18O)) +
   theme_minimal() +
   theme(axis.title = element_text(size = 10))
 
-Rd_length_plot <- ggplot(data = SURF_data, aes(x = Cl, y = RdLength_per_WtshdArea, color = typeWater)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", color = "red") +
+Rd_length_plot <- ggplot(data = SURF_data, aes(x = Cl, y = RdLength_per_WtshdArea, color = X18O)) + 
+  geom_point(color = "black", size = 1.5) +
+  geom_point(size = 1, aes(color = X18O)) +
+  geom_smooth(method = "lm", color = "burlywood") +
+  scale_color_gradient2(low = "blue", mid = "white", high = "orange", midpoint = -7) +
   labs(x = "Chloride (mg/l)", y = "Road Length 
-       per Watershed Area") +
+       per Watershed Area", color = "O18") +
   theme_minimal() +
   theme(legend.position = "none") +
   theme(axis.title = element_text(size = 10))
 
 
-wtshd_dev_plot <- ggplot(data = SURF_data, aes(x = Cl, y = Percent_wtshd_dev, color = typeWater)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", color = "red") +
-  labs(x = "Chloride (mg/l)", y = "Percent Developed") +
+wtshd_dev_plot <- ggplot(data = SURF_data, aes(x = Cl, y = Percent_wtshd_dev, color = X18O)) + 
+  geom_point(color = "black", size = 1.5) +
+  geom_point(size = 1, aes(color = X18O)) +
+  geom_smooth(method = "lm", color = "burlywood") +
+  scale_color_gradient2(low = "blue", mid = "white", high = "orange", midpoint = -7) +
+  labs(x = "Chloride (mg/l)", y = "Percent Developed", color = "O18") +
   coord_cartesian(ylim = c(0, 100)) + 
-  guides(color = guide_legend(title = "Dominant Water Source")) +
   theme_minimal() +
   theme(legend.position = "right") +
-  theme(axis.title = element_text(size = 10), legend.title = element_text(size = 10),legend.text = element_text(size = 8))
+  theme(axis.title = element_text(size = 10), legend.title = element_text(size = 10), legend.text = element_text(size = 8))
+
 
 DIC_plot <- ggplot(data = SURF_data, aes(x = Cl, y = DIC)) + 
   geom_point() + 
@@ -107,6 +121,28 @@ library(patchwork)
 combined_SURFplots <- O18_plot / DIC_plot / Rd_length_plot / wtshd_dev_plot + plot_layout(ncol = 2)
 print(combined_SURFplots)
 ```
+
+
+## Correlation Analysis
+
+```{r correlation analysis and heat map}
+numeric_SURF <- SURF_data %>%
+  select(-c(Percent_wtshd_dev, RdLength_per_WtshdArea)) %>%
+  select_if(is.numeric)
+
+cor_matrix <- cor(numeric_SURF)
+
+cor_df <- as.data.frame(as.table(cor_matrix))
+
+ggplot(cor_df, aes(Var1, Var2, fill = Freq)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
 
 ## Recent Linear Regressions
 
