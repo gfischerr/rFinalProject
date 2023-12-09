@@ -1,11 +1,13 @@
 ---
-title: "Final Project - Results and Analysis"
+title: "Final Project: Predictors of Summer Chloride in Urban Aquatic Ecosystems"
 author: "Georgianna Fischer"
-date: "2023-11-21"
+date: "8th December 2023"
 output:
   pdf_document: default
   word_document: default
   html_document: default
+bibliography: R_Project_References.bib
+csl: urban-ecosystems.csl
 ---
 
 ```{r setup, include=FALSE}
@@ -13,9 +15,30 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
-## Data Cleaning
+## Introduction
+In urban environments, aquatic ecosystems are an important source of water, recreation, and aesthetic value. Excess concentrations of chloride in the environment can negatively impact ecosystems, especially biodiversity and functioning of aquatic ecosystems, and also affect human uses of water by reducing drinking water quality and increasing corrosivity of surface water [@richburg_effects_2001; @stets_increasing_2018]. High chloride concentrations in most northern cities come primarily from road salt use for de-icing, in the form of NaCl, but can also arrive in the environment by way of wastewater and fertilizer [@overbo_evaluation_2021]. Road salt is especially problematic because it generates thaw water that leaches chloride into the environment [@herb_study_2017]. Moreover, road salt application is highly concentrated in winter months, and is primarily applied to impervious surfaces that readily shed water, such as roads.  
 
-```{r data cleaning}
+
+Surface runoff is largely responsible for the majority of chloride carried into the environment. However, substantial amounts infiltrate to groundwater through soils, including rain gardens and other green infrastructure. Therefore, specific pathways of runoff and hydrology of waterbodies (such as streams, lakes, and aquifers) will regulate chloride concentrations in the months after the spring runoff season. Understanding these hydrologic controls is critical to predicting the effects of chloride on the environment [@herb_study_2017]. Much research has investigated the effects of chloride [@hintz_review_2019; @novotny_road_2012], but still more needs to be done to conceptualize how and in what quantities chloride enters the environment and how that changes over the course of the year and with specific features of streams, ponds, and lakes.  In this study I will evaluate both historic trends in chloride concentrations in the Twin Cities Metro Area (TCMA) in Minnesota as well as data I collected during in July of 2023 in the TCMA on chloride data as well as several biogeochemical tracers, including oxygen isotope ratios (O18) and dissolved inorganic carbon (DIC), and landcover information, including road density and percentage developed of the various site watersheds. The objective of this study is to develop predictors of chloride concentrations and identify how the hydrology of urban ecosystems may impact exposure to chloride. 
+
+
+## Methods
+*Data collection*
+
+This project involved two datasets - one a collection of historical chloride data in the TCMA provided by Dr. Jacques Finlay at the University of Minnesota and the second collected in July of 2023. Samples were collected at baseflow conditions from 36 stream sites around the TCMA. Three types of samples were collected from each site: one for DIC analysis, one for Ion analysis, and the third for water isotope analysis. DIC samples were filtered and processed through a Shimadzu TOC-L, and ion samples were filtered and chloride (Cl-), nitrate (NO3-), sulfate (SO42-), and phosphate (PO43-) were measured by ion chromatography. Water isotope samples were left unfiltered and O18 values were analyzed. Model My Watershed (Stroud Research Center) and ArcGIS Pro were used to determine watershed area and summarize watershed characteristics for applicable sites. Both datasets were then converted into csv files and imported into R, where unnecessary columns were removed.
+
+\
+*Historic chloride patterns with stream hydrology*
+
+To compare historical chloride concentrations and determine how hydrology of a system may cause variations in summer chloride, I summarized chloride concentrations by type, and using ggplot2 created bar graphs of average chloride concentrations by type of waterbody during historical (1969-2022) summers.
+
+
+\
+*Evaluating biogeochemical tracers and land characteristics with chloride concentrations*
+
+For the most recent dataset, I looked at the distribution of chloride values by modeling chloride concentrations with a histogram, and created a correlation matrix to analyze the relationship between the variables. I also visualized the relationship between chloride concentrations and four different factors:  DIC, O18, road length per watershed area, and percentage of the watershed classified as “developed” by creating scatterplots using ggplot2 and the geom_smooth() function to fit a trendline to the data. I also used scale_color_gradient to differentiate between O18 values indicating groundwater dominated (less than -7) and surfact water dominated (greater than -7). I then ran a linear regression analysis to determine the relationship between chloride concentrations and each of the four factors. 
+
+```{r data cleaning, warning=FALSE, include=FALSE}
 if (interactive()) {
   chloride_raw <- read.csv(file.choose())
 } else {
@@ -43,43 +66,85 @@ if (interactive()) {
 SURF_data <- subset(SURF_raw, select = -c(X, X.1, X.2, X.3, X.4))
 ```
 
-## Historical Graph
+# Results
 
-```{r Historic Patterns}
+### Historical summer chloride
+```{r Historic Patterns, include=FALSE, warning=FALSE}
 chloride_sum <- chloride_data %>%
   drop_na(summer_overall_avg_cl) %>%
   group_by(type) %>%
-  summarize(mean_Overall_avg_Cl = mean(Overall_avg_Cl), mean_summer_overall_cl = mean(summer_overall_avg_cl), mean_recent_cl = mean(recent_avg_cl), mean_recent_summer_cl = mean(summer_recent_avg_cl))
+  summarize(mean_summer_overall_cl = mean(summer_overall_avg_cl), mean_recent_cl = mean(recent_avg_cl))
 
 Avg_summer_plot <- chloride_sum %>%
   ggplot(aes(x = type, y = mean_summer_overall_cl)) + 
   geom_bar(stat = 'identity', fill = 'lightblue') +
-  labs(title = "Historical (1969-2022) Average Summer Chloride by Type", 
-       x = "Waterbody Type", 
+  labs(x = "Waterbody Type", 
        y = "Mean summer chloride (mg/L)") + 
   theme_minimal()
+```
+
+```{r Figure 1, echo=FALSE}
 print(Avg_summer_plot)
 ```
+\begingroup
+\fontsize{8}{10}\selectfont
+Figure 1. Average summer chloride concentrations by waterbody type, 1969 - 2022. Some waterbody types represent a much greater number of datapoints than others. 
+\endgroup
 
-## Historical Draft Analysis
-  The results of the historical summer chloride graph shows a lot of variance between the types of water bodies. The lowest average chloride values lie in ponds and mixed wetlands and ponds, with 28 mg/L of chloride present. Lakes, ponds, wetlands, and streams all had relatively low historical summer chloride, while drains and springs had the highest chloride concentrations at roughly 232 and 229 mg/L, respectively.  
+\
+Figure 1 shows much variance between the types of water bodies. The lowest average chloride values lie in ponds and mixed wetlands and ponds, with 28 mg/L of chloride present. Lakes, ponds, wetlands, and streams all had relatively low historical summer chloride, while drains and springs had the highest chloride concentrations at roughly 232 and 229 mg/L, respectively.  
 
-## Recent graphs
-### Histogram
-```{r chloride dist}
+### Recent summer chloride 
+
+```{r chloride dist, include=FALSE, warning=FALSE}
 Cl_dist_23 <- SURF_data %>%
   ggplot( aes(x=Cl)) +
-    geom_histogram( binwidth=20, fill="#69b3a2", color="#e9ecef", alpha=0.9) +
-    ggtitle("Chloride Concentration") +
-    theme_minimal() +
-    theme(
-      plot.title = element_text(size=15))
-print(Cl_dist_23)
+  geom_histogram( binwidth=30, fill="#69b3a2", color="#e9ecef", alpha=0.9) +
+  labs(x="Chloride (mg/L)",
+       y="Count") +
+    theme_minimal() 
 ```
 
+```{r Figure 2 (Histogram), echo=FALSE}
+print(Cl_dist_23)
+```
+\begingroup
+\fontsize{8}{10}\selectfont
+Figure 2. Histogram of chloride concentrations measured across sites in June and August of 2023.
+\endgroup
 
-### Scatterplots
-```{r recent patterns scatterplots}
+\
+The distribution of chloride values found in the summer 2023 sampling period shows wide variety among sites (Figure 4). The values skew to the left, and majority of sites are clustered around 200 mg/L. There are two outliers, however, at about 500 and 650 mg/L, respectively.
+
+```{r correlation analysis, include=FALSE, warning=FALSE}
+numeric_SURF <- SURF_data %>%
+  select(-c(Percent_wtshd_dev, RdLength_per_WtshdArea)) %>%
+  select_if(is.numeric)
+
+cor_matrix <- cor(numeric_SURF)
+
+cor_df <- as.data.frame(as.table(cor_matrix))
+
+SURF_heatmap <- ggplot(cor_df, aes(Var1, Var2, fill = Freq)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r Figure 3 (heatmap), echo=FALSE}
+print(SURF_heatmap)
+```
+\begingroup
+\fontsize{8}{10}\selectfont
+Figure 3. Heat map displaying the correlation between values. Red indicates positive correlation while purple indicates negative correlation. White indicates no correlation. 
+\endgroup
+
+#### Correlation between variables \
+The correlation matrix in Figure 3 indicates that chloride is weakly  positively correlated with sulfate and nitrate, very weakly negatively correlated with phosphate, weakly negatively correlated with O18, and has almost no correlation with DIC. Amongst the other variables, DIC and O18 have the highest level of correlation, with a moderate negative correlation. Sulfate and nitrate are also moderately correlated, and phosphate has a very correlation with every variable measured. 
+
+
+```{r recent patterns, include=FALSE, warning=FALSE}
 O18_plot <- ggplot(data = SURF_data, aes(x = Cl, y = X18O)) + 
   geom_point() + 
   geom_smooth(method = "lm", color = "blue") +
@@ -117,36 +182,21 @@ DIC_plot <- ggplot(data = SURF_data, aes(x = Cl, y = DIC)) +
   labs(x = "Chloride (mg/l)", y = "DIC")+
   theme_minimal() +
   theme(axis.title = element_text(size = 10))
+
 library(patchwork)
 combined_SURFplots <- O18_plot / DIC_plot / Rd_length_plot / wtshd_dev_plot + plot_layout(ncol = 2)
+```
+
+```{r Figure 4 (scatterplots), echo=FALSE, warning=FALSE, message=FALSE}
 print(combined_SURFplots)
 ```
+\begingroup
+\fontsize{8}{10}\selectfont
+Figure 4. Linear relationship between chloride and biogeochemical tracers (top) and watershed characteristics (bottom). O18 values are included for watershed characteristics. Lower values (purple) indicate more groundwater dominated while higher values (orange) indicate more surface water dominated sites. 
+\endgroup
 
 
-## Correlation Analysis
-
-```{r correlation analysis and heat map}
-numeric_SURF <- SURF_data %>%
-  select(-c(Percent_wtshd_dev, RdLength_per_WtshdArea)) %>%
-  select_if(is.numeric)
-
-cor_matrix <- cor(numeric_SURF)
-
-cor_df <- as.data.frame(as.table(cor_matrix))
-
-ggplot(cor_df, aes(Var1, Var2, fill = Freq)) +
-  geom_tile(color = "white") +
-  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-
-```
-
-
-## Recent Linear Regressions
-
-```{r recent patterns linear regressions}
+```{r recent patterns linear regressions, include=FALSE, warning=FALSE}
 O18_linearmod <- lm(X18O~Cl, data = SURF_data)
 summary(O18_linearmod)
 DIC_linearmod <- lm(DIC~Cl, data = SURF_data)
@@ -157,6 +207,25 @@ roads_linearmod <- lm(RdLength_per_WtshdArea~Cl, data = SURF_data)
 summary(roads_linearmod)
 ```
 
-## Analysis of recent trends
-  The results of the relationship between the biogeochemical tracers and chloride showed much fine scale heterogeneity. Both oxygen isotope ratios (O18) and dissolved inorganic carbon (DIC) showed a lot of variance within the data, with a few outliers. While there is a general downward trend to the data, the relationship isn't very significant for either, although O18 is shown to have more of a relationship with the chloride values than DIC - the results of the linear regression show that the O18 relationship has a p-value of 0.0996 and an R-squared value of 0.08504, while the DIC relationship has a p-value of 0.66 and an R-squared value of 0.006328. 
-  As for the land use indicators, both had a positive relationship with chloride concentrations. For every increase in mg/L of chloride, percentage of developed land within the watershed was shown to increase by 0.088824. Road length per watershed area increased by 0.003751 with chloride. Linear regression of these relationships indicates a relatively significant relationship for percent watershed developed and chloride, with a p-value of 0.00531 and an R-squared of 0.3751. The relationship between road length and chloride is slightly less significant, with a p-value of 0.127 and an R-squared of 0.1318. 
+#### Drivers of chloride concentrations \
+The results in Figure 4 of the relationship between the biogeochemical tracers and chloride showed much fine scale heterogeneity. Both oxygen isotope ratios (O18) and dissolved inorganic carbon (DIC) showed a lot of variance within the data, with a few outliers. While there is a general downward trend to the data, the relationship isn't very significant for either, although O18 is shown to have more of a relationship with the chloride values than DIC - the results of the linear regression show that the O18 relationship has a p-value of 0.0996 and an R-squared value of 0.08504, while the DIC relationship has a p-value of 0.66 and an R-squared value of 0.006328. 
+  
+As for the land use indicators, both had a positive relationship with chloride concentrations. For every increase in mg/L of chloride, percentage of developed land within the watershed was shown to increase by 0.088824. Road length per watershed area increased by 0.003751 with chloride. Linear regression of these relationships indicates a relatively significant relationship for percent watershed developed and chloride, with a p-value of 0.00531 and an R-squared of 0.3751. The relationship between road length and chloride is slightly less significant, with a p-value of 0.127 and an R-squared of 0.1318. 
+
+# Discussion
+
+Historical trends in the data indicate that waterbody does in fact influence summer chloride concentrations. The higher concentrations of chloride in drains and springs is likely indicative of springs being groundwater driven and therefore more likely to carry higher levels of chloride in the summer, while drains are reflective of storm runoff and therefore are more likely to have higher chloride values. Unfortunately this dataset was much less robust than it first appeared, as much of the data was missing and the main purpose of the datasheet was to summarize chloride values across sites in many ongoing monitoring projects. However, the dataset still proved useful in documenting historical average summer chloride and indicating how waterbody type can cause huge variations in concentrations of chloride.
+
+In comparing historical average chloride values to the most recent year of data, 
+
+Paragraph about correlation
+
+Paragraph about land use
+
+Paragraph about water year
+
+*Future work*
+look at more complete historical record
+continue monitering chlroide 
+
+# References
