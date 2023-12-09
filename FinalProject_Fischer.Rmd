@@ -1,7 +1,7 @@
 ---
 title: "Final Project: Predictors of Summer Chloride in Urban Aquatic Ecosystems"
 author: "Georgianna Fischer"
-date: "8th December 2023"
+date: "December 8th, 2023"
 output:
   pdf_document: default
   word_document: default
@@ -16,7 +16,7 @@ library(tidyverse)
 ```
 
 ## Introduction
-In urban environments, aquatic ecosystems are an important source of water, recreation, and aesthetic value. Excess concentrations of chloride in the environment can negatively impact ecosystems, especially biodiversity and functioning of aquatic ecosystems, and also affect human uses of water by reducing drinking water quality and increasing corrosivity of surface water [@richburg_effects_2001; @stets_increasing_2018]. High chloride concentrations in most northern cities come primarily from road salt use for de-icing, in the form of NaCl, but can also arrive in the environment by way of wastewater and fertilizer [@overbo_evaluation_2021]. Road salt is especially problematic because it generates thaw water that leaches chloride into the environment [@herb_study_2017]. Moreover, road salt application is highly concentrated in winter months, and is primarily applied to impervious surfaces that readily shed water, such as roads.  
+Urban aquatic ecosystems are highly threatened by excess concentrations of chloride. In urban environments, aquatic ecosystems are an important source of water, recreation, and aesthetic value. Excess concentrations of chloride in the environment can negatively impact ecosystems, especially biodiversity and functioning of aquatic ecosystems, and also affect human uses of water by reducing drinking water quality and increasing corrosivity of surface water [@richburg_effects_2001; @stets_increasing_2018]. High chloride concentrations in most northern cities come primarily from road salt use for de-icing, in the form of NaCl, but can also arrive in the environment by way of wastewater and fertilizer [@overbo_evaluation_2021]. Road salt is especially problematic because it generates thaw water that leaches chloride into the environment [@herb_study_2017]. Moreover, road salt application is highly concentrated in winter months, and is primarily applied to impervious surfaces that readily shed water, such as roads.  
 
 
 Surface runoff is largely responsible for the majority of chloride carried into the environment. However, substantial amounts infiltrate to groundwater through soils, including rain gardens and other green infrastructure. Therefore, specific pathways of runoff and hydrology of waterbodies (such as streams, lakes, and aquifers) will regulate chloride concentrations in the months after the spring runoff season. Understanding these hydrologic controls is critical to predicting the effects of chloride on the environment [@herb_study_2017]. Much research has investigated the effects of chloride [@hintz_review_2019; @novotny_road_2012], but still more needs to be done to conceptualize how and in what quantities chloride enters the environment and how that changes over the course of the year and with specific features of streams, ponds, and lakes.  In this study I will evaluate both historic trends in chloride concentrations in the Twin Cities Metro Area (TCMA) in Minnesota as well as data I collected during in July of 2023 in the TCMA on chloride data as well as several biogeochemical tracers, including oxygen isotope ratios (O18) and dissolved inorganic carbon (DIC), and landcover information, including road density and percentage developed of the various site watersheds. The objective of this study is to develop predictors of chloride concentrations and identify how the hydrology of urban ecosystems may impact exposure to chloride. 
@@ -114,7 +114,7 @@ Figure 2. Histogram of chloride concentrations measured across sites in June and
 \endgroup
 
 \
-The distribution of chloride values found in the summer 2023 sampling period shows wide variety among sites (Figure 4). The values skew to the left, and majority of sites are clustered around 200 mg/L. There are two outliers, however, at about 500 and 650 mg/L, respectively.
+The distribution of chloride values found in the summer 2023 sampling period shows wide variety among sites (Figure 2). The values skew to the left, and majority of sites are clustered around 200 mg/L. There are two outliers, however, at about 500 and 650 mg/L, respectively.
 
 ```{r correlation analysis, include=FALSE, warning=FALSE}
 numeric_SURF <- SURF_data %>%
@@ -214,18 +214,18 @@ As for the land use indicators, both had a positive relationship with chloride c
 
 # Discussion
 
+*Historic patterns* 
+
 Historical trends in the data indicate that waterbody does in fact influence summer chloride concentrations. The higher concentrations of chloride in drains and springs is likely indicative of springs being groundwater driven and therefore more likely to carry higher levels of chloride in the summer, while drains are reflective of storm runoff and therefore are more likely to have higher chloride values. Unfortunately this dataset was much less robust than it first appeared, as much of the data was missing and the main purpose of the datasheet was to summarize chloride values across sites in many ongoing monitoring projects. However, the dataset still proved useful in documenting historical average summer chloride and indicating how waterbody type can cause huge variations in concentrations of chloride.
 
-In comparing historical average chloride values to the most recent year of data, 
+\
+*Drivers of chloride*
 
-Paragraph about correlation
+Trends between the variables and summer chloride values in 2023 suggest that land use within watersheds is a significant driver of chloride concentrations within urban waterbodies. The fairly significant positive relationship between each of the two land use variables reflects how winter road salt applications can have a continuous significant effect on ecosystems into the more productive summer months. 
 
-Paragraph about land use
+The surprising results come within the lack of correlation between the biogeochemical tracers and chloride concentrations. I expected to see chloride concentrations increasing with the lower O18 values and higher DIC values that are indicative of snowmelt and groundwater. The trend, however, showed a lot of fine-scale heterogeneity amongst the sites.  While this was an unexpected result, the likely explanation is the unusual water year that took place in Minnesota - the area experienced an unusually dry spring and summer following a high snow year. While the heavy winter might have caused increased inputs of road salt, the dry spring and summer would have served to quickly flush the chloride out through snowmelt. At the point of sampling, the limited spring and summer rains would have meant limited storm runoff, diminishing the difference in chloride concentrations between groundwater and surface water sites. 
 
-Paragraph about water year
+Future work is needed within this field - a more complete look at the historical record of chloride concentrations would be useful in determining pathways of summer chloride concentrations. Furthermore, given the unusual water year, a continuation of this project into future years would shed light into just how much of a role the water year plays into driving chloride concentrations, and would be helpful in determining how, in a more normal water year, groundwater truly affects chloride concentrations. 
 
-*Future work*
-look at more complete historical record
-continue monitering chlroide 
 
 # References
